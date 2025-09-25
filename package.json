@@ -1,0 +1,40 @@
+{
+  "name": "git-workflow-electron-app",
+  "version": "1.0.0",
+  "description": "A GUI for managing git commits with conventional commit messages",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder"
+  },
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "electron": "^38.1.2",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "simple-git": "^3.28.0"
+  },
+  "build": {
+    "appId": "com.grizak.git-workflow-electron-app",
+    "files": [
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "productName": "Git Workflow Electron App",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

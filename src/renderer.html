@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Git Commit GUI</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #1e1e1e;
+        color: #ffffff;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        background: #2d2d2d;
+        padding: 15px 20px;
+        border-bottom: 1px solid #404040;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .repo-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      button {
+        background: #0078d4;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: #106ebe;
+      }
+
+      button:disabled {
+        background: #404040;
+        cursor: not-allowed;
+      }
+
+      .secondary-btn {
+        background: #404040;
+      }
+
+      .secondary-btn:hover {
+        background: #505050;
+      }
+
+      .danger-btn {
+        background: #d73a49;
+      }
+
+      .danger-btn:hover {
+        background: #cb2431;
+      }
+
+      .repo-info {
+        flex: 1;
+        text-align: center;
+      }
+
+      .branch-name {
+        color: #0078d4;
+        font-weight: bold;
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+
+      .left-panel {
+        width: 60%;
+        border-right: 1px solid #404040;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .right-panel {
+        width: 40%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .panel-header {
+        background: #2d2d2d;
+        padding: 10px 15px;
+        border-bottom: 1px solid #404040;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .panel-title {
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .file-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+        user-select: none;
+      }
+
+      .file-item:hover {
+        background: #2d2d2d;
+      }
+
+      .file-item.selected {
+        background: #0078d4;
+      }
+
+      .file-checkbox {
+        margin-right: 10px;
+      }
+
+      .file-name {
+        flex: 1;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+      }
+
+      .file-status {
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+
+      .status-modified {
+        background: #ffd700;
+        color: #000;
+      }
+
+      .status-added {
+        background: #28a745;
+        color: #fff;
+      }
+
+      .status-deleted {
+        background: #dc3545;
+        color: #fff;
+      }
+
+      .status-staged {
+        background: #6f42c1;
+        color: #fff;
+      }
+
+      .commit-section {
+        padding: 20px;
+        border-bottom: 1px solid #404040;
+      }
+
+      .commit-message {
+        width: 100%;
+        background: #2d2d2d;
+        border: 1px solid #404040;
+        border-radius: 4px;
+        padding: 10px;
+        color: white;
+        font-size: 14px;
+        margin-bottom: 15px;
+        resize: none;
+        min-height: 60px;
+      }
+
+      .commit-message::placeholder {
+        color: #888;
+      }
+
+      .commit-message:focus {
+        outline: none;
+        border-color: #0078d4;
+      }
+
+      .recent-commits {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+      }
+
+      .commit-item {
+        padding: 12px;
+        border-left: 3px solid #0078d4;
+        background: #2d2d2d;
+        margin-bottom: 10px;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .commit-hash {
+        color: #888;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+      }
+
+      .commit-msg {
+        margin: 5px 0;
+        font-size: 14px;
+      }
+
+      .commit-author {
+        color: #888;
+        font-size: 12px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+      }
+
+      .error {
+        background: #d73a49;
+        color: white;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px;
+      }
+
+      .no-repo {
+        text-align: center;
+        padding: 50px;
+        color: #888;
+      }
+
+      .stats {
+        font-size: 12px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="repo-selector">
+        <button id="selectRepo">Select Repository</button>
+        <button id="refreshRepo" class="secondary-btn" disabled>Refresh</button>
+      </div>
+      <div class="repo-info">
+        <span id="repoPath">No repository selected</span>
+        <div id="branchInfo"></div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="left-panel">
+        <div class="panel-header">
+          <div class="panel-title">Changed Files</div>
+          <div class="stats" id="fileStats"></div>
+        </div>
+        <div class="file-list" id="fileList">
+          <div class="no-repo">Select a git repository to get started</div>
+        </div>
+        <div class="panel-header">
+          <button id="stageSelected" class="secondary-btn" disabled>
+            Stage Selected
+          </button>
+          <button id="unstageSelected" class="secondary-btn" disabled>
+            Unstage Selected
+          </button>
+          <button id="stageAll" class="secondary-btn" disabled>
+            Stage All
+          </button>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="commit-section">
+          <div class="panel-title" style="margin-bottom: 15px">
+            Commit Message
+          </div>
+
+          <textarea
+            id="commitMessage"
+            class="commit-message"
+            placeholder="Enter commit message (e.g., feat: add user authentication system)"
+          ></textarea>
+          <button id="commitBtn" disabled>Commit Changes</button>
+        </div>
+
+        <div class="panel-header">
+          <div class="panel-title">Recent Commits</div>
+        </div>
+        <div class="recent-commits" id="recentCommits">
+          <div class="loading">No commits to show</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentRepo = null;
+      let selectedFiles = new Set();
+      let repoStatus = null;
+
+      // DOM Elements
+      const selectRepoBtn = document.getElementById("selectRepo");
+      const refreshRepoBtn = document.getElementById("refreshRepo");
+      const repoPathSpan = document.getElementById("repoPath");
+      const branchInfo = document.getElementById("branchInfo");
+      const fileList = document.getElementById("fileList");
+      const fileStats = document.getElementById("fileStats");
+      const stageSelectedBtn = document.getElementById("stageSelected");
+      const unstageSelectedBtn = document.getElementById("unstageSelected");
+      const stageAllBtn = document.getElementById("stageAll");
+      const commitMessage = document.getElementById("commitMessage");
+      const commitBtn = document.getElementById("commitBtn");
+      const recentCommits = document.getElementById("recentCommits");
+
+      // Event Listeners
+      selectRepoBtn.addEventListener("click", selectRepository);
+      refreshRepoBtn.addEventListener("click", refreshRepository);
+      stageSelectedBtn.addEventListener("click", stageSelectedFiles);
+      unstageSelectedBtn.addEventListener("click", unstageSelectedFiles);
+      stageAllBtn.addEventListener("click", stageAllFiles);
+      commitBtn.addEventListener("click", commitChanges);
+
+      commitMessage.addEventListener("input", updateCommitButton);
+
+      async function selectRepository() {
+        try {
+          const result = await window.electronAPI.selectRepo();
+          if (result.success) {
+            currentRepo = result.path;
+            repoPathSpan.textContent = currentRepo;
+            refreshRepoBtn.disabled = false;
+            await loadRepositoryData();
+          } else {
+            showError(result.error);
+          }
+        } catch (error) {
+          showError("Failed to select repository");
+        }
+      }
+
+      async function refreshRepository() {
+        if (currentRepo) {
+          await loadRepositoryData();
+        }
+      }
+
+      async function loadRepositoryData() {
+        try {
+          fileList.innerHTML = '<div class="loading">Loading...</div>';
+          recentCommits.innerHTML = '<div class="loading">Loading...</div>';
+
+          const [statusResult, commitsResult] = await Promise.all([
+            window.electronAPI.getRepoStatus(currentRepo),
+            window.electronAPI.getRecentCommits(currentRepo),
+          ]);
+
+          if (statusResult.success) {
+            repoStatus = statusResult.status;
+            displayRepositoryStatus();
+            displayFileList();
+          } else {
+            showError(statusResult.error);
+          }
+
+          if (commitsResult.success) {
+            displayRecentCommits(commitsResult.commits);
+          }
+        } catch (error) {
+          showError("Failed to load repository data");
+        }
+      }
+
+      function displayRepositoryStatus() {
+        const branch = repoStatus.current;
+        branchInfo.innerHTML = `Branch: <span class="branch-name">${branch}</span>`;
+
+        const totalChanges =
+          repoStatus.modified.length +
+          repoStatus.created.length +
+          repoStatus.deleted.length;
+        const stagedChanges = repoStatus.staged.length;
+        fileStats.textContent = `${totalChanges} changes, ${stagedChanges} staged`;
+      }
+
+      function displayFileList() {
+        const allFiles = [
+          ...repoStatus.modified.map((file) => ({
+            name: file,
+            status: "modified",
+          })),
+          ...repoStatus.created.map((file) => ({
+            name: file,
+            status: "added",
+          })),
+          ...repoStatus.deleted.map((file) => ({
+            name: file,
+            status: "deleted",
+          })),
+          ...repoStatus.staged.map((file) => ({
+            name: file,
+            status: "staged",
+          })),
+        ];
+
+        if (allFiles.length === 0) {
+          fileList.innerHTML =
+            '<div class="no-repo">No changes to commit</div>';
+          return;
+        }
+
+        fileList.innerHTML = allFiles
+          .map(
+            (file) => `
+                <div class="file-item" data-file="${file.name}">
+                    <input type="checkbox" class="file-checkbox" data-file="${
+                      file.name
+                    }">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-status status-${
+                      file.status
+                    }">${file.status.toUpperCase()}</span>
+                </div>
+            `
+          )
+          .join("");
+
+        // Add click handlers
+        fileList.querySelectorAll(".file-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            if (e.target.type !== "checkbox") {
+              const checkbox = item.querySelector(".file-checkbox");
+              checkbox.checked = !checkbox.checked;
+              checkbox.dispatchEvent(new Event("change"));
+            }
+          });
+        });
+
+        fileList.querySelectorAll(".file-checkbox").forEach((checkbox) => {
+          checkbox.addEventListener("change", (e) => {
+            const fileName = e.target.dataset.file;
+            if (e.target.checked) {
+              selectedFiles.add(fileName);
+            } else {
+              selectedFiles.delete(fileName);
+            }
+            updateButtons();
+          });
+        });
+
+        updateButtons();
+      }
+
+      function displayRecentCommits(commits) {
+        if (commits.length === 0) {
+          recentCommits.innerHTML =
+            '<div class="loading">No recent commits</div>';
+          return;
+        }
+
+        recentCommits.innerHTML = commits
+          .map(
+            (commit) => `
+                <div class="commit-item">
+                    <div class="commit-hash">${commit.hash.substring(
+                      0,
+                      7
+                    )}</div>
+                    <div class="commit-msg">${commit.message}</div>
+                    <div class="commit-author">${
+                      commit.author_name
+                    } • ${new Date(commit.date).toLocaleDateString()}</div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function stageSelectedFiles() {
+        if (selectedFiles.size === 0) return;
+
+        try {
+          const files = Array.from(selectedFiles);
+          const result = await window.electronAPI.stageFiles(
+            currentRepo,
+            files
+          );
+          if (result.success) {
+            selectedFiles.clear();
+            await loadRepositoryData();
+          } else {
+            showError(result.error);
+          }
+        } catch (error) {
+          showError("Failed to stage files");
+        }
+      }
+
+      async function unstageSelectedFiles() {
+        if (selectedFiles.size === 0) return;
+
+        try {
+          const files = Array.from(selectedFiles);
+          const result = await window.electronAPI.unstageFiles(
+            currentRepo,
+            files
+          );
+          if (result.success) {
+            selectedFiles.clear();
+            await loadRepositoryData();
+          } else {
+            showError(result.error);
+          }
+        } catch (error) {
+          showError("Failed to unstage files");
+        }
+      }
+
+      async function stageAllFiles() {
+        try {
+          const allFiles = [
+            ...repoStatus.modified,
+            ...repoStatus.created,
+            ...repoStatus.deleted,
+          ];
+          if (allFiles.length === 0) return;
+
+          const result = await window.electronAPI.stageFiles(
+            currentRepo,
+            allFiles
+          );
+          if (result.success) {
+            selectedFiles.clear();
+            await loadRepositoryData();
+          } else {
+            showError(result.error);
+          }
+        } catch (error) {
+          showError("Failed to stage all files");
+        }
+      }
+
+      async function commitChanges() {
+        const message = commitMessage.value.trim();
+        if (!message || !currentRepo) return;
+
+        try {
+          const message = commitMessage.value.trim();
+          const result = await window.electronAPI.commitChanges(
+            currentRepo,
+            message
+          );
+
+          if (result.success) {
+            commitMessage.value = "";
+            await loadRepositoryData();
+            showSuccess(`Committed: ${result.commit}`);
+          } else {
+            showError(result.error);
+          }
+        } catch (error) {
+          showError("Failed to commit changes");
+        }
+      }
+
+      function updateCommitButton() {
+        const hasMessage = commitMessage.value.trim().length > 0;
+        const hasStagedFiles = repoStatus && repoStatus.staged.length > 0;
+        commitBtn.disabled = !hasMessage || !hasStagedFiles || !currentRepo;
+      }
+
+      function updateButtons() {
+        const hasSelection = selectedFiles.size > 0;
+        const hasFiles =
+          repoStatus &&
+          repoStatus.modified.length +
+            repoStatus.created.length +
+            repoStatus.deleted.length >
+            0;
+
+        stageSelectedBtn.disabled = !hasSelection || !currentRepo;
+        unstageSelectedBtn.disabled = !hasSelection || !currentRepo;
+        stageAllBtn.disabled = !hasFiles || !currentRepo;
+
+        updateCommitButton();
+      }
+
+      function showError(message) {
+        // Simple error display - could be enhanced with a proper notification system
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error";
+        errorDiv.textContent = message;
+        document.body.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+
+      function showSuccess(message) {
+        const successDiv = document.createElement("div");
+        successDiv.style.cssText =
+          "position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px; border-radius: 4px; z-index: 1000;";
+        successDiv.textContent = message;
+        document.body.appendChild(successDiv);
+        setTimeout(() => successDiv.remove(), 3000);
+      }
+    </script>
+  </body>
+</html>
