@@ -6,35 +6,100 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --config.directories.output=dist/win",
+    "build:linux": "electron-builder --linux --config.directories.output=dist/linux",
+    "build:mac": "electron-builder --mac --config.directories.output=dist/mac",
+    "build:all": "concurrently \"pnpm run build:win\" \"pnpm run build:linux\" \"pnpm run build:mac\"",
+    "clean": "rimraf dist",
+    "dist": "pnpm clean && pnpm build:all"
   },
   "packageManager": "pnpm@10.17.1",
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "electron": "^38.1.2",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "rimraf": "^6.0.1"
   },
   "dependencies": {
     "simple-git": "^3.28.0"
   },
+  "author": "Isak Grönlund <gronlundisak11@gmail.com> (https://isaksweb.xyz)",
   "build": {
     "appId": "com.grizak.git-workflow-electron-app",
+    "productName": "Git Workflow Electron App",
+    "directories": {
+      "output": "dist"
+    },
     "files": [
-      "src/**/*",
+      "dist/**/*",
       "node_modules/**/*",
       "package.json"
     ],
-    "directories": {
-      "output": "dist",
-      "buildResources": "assets"
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
     },
-    "productName": "Git Workflow Electron App",
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+    "linux": {
+      "category": "Development",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "snap",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "snap": {
+      "plugs": [
+        "default",
+        "home",
+        "removable-media"
+      ]
     }
   }
 }
