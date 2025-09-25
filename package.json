@@ -32,7 +32,7 @@
       "output": "dist"
     },
     "files": [
-      "dist/**/*",
+      "src/**/*",
       "node_modules/**/*",
       "package.json"
     ],
