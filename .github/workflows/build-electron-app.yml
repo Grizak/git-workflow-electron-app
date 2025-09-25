@@ -51,6 +51,7 @@ jobs:
             libxdamage1 \
             libxrandr2 \
             libasound2 \
+            libasound2-dev \
             libnss3 \
             libxss1 \
             libxtst6 \
