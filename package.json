@@ -18,7 +18,7 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "electron": "^38.1.2",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "26.0.12",
     "rimraf": "^6.0.1"
   },
   "dependencies": {
