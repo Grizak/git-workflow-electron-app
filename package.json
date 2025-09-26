@@ -101,5 +101,10 @@
         "removable-media"
       ]
     }
+  },
+  "pnpm": {
+    "overrides": {
+      "app-builder-bin": "4.2.0"
+    }
   }
 }
