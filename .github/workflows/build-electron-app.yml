@@ -2,10 +2,7 @@ name: Build Electron App
 
 on:
   push:
-    branches: [main, master]
     tags: ["v*"]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -55,6 +52,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Fix app-builder permissions
+        run: |
+          chmod +x node_modules/.pnpm/app-builder-bin@4.2.0/node_modules/app-builder-bin/mac/app-builder_arm64 || true
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
