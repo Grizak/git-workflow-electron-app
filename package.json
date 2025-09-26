@@ -1,6 +1,6 @@
 {
   "name": "git-workflow-electron-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A GUI for managing git commits with conventional commit messages",
   "main": "src/main.js",
   "scripts": {
