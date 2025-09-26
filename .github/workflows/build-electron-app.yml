@@ -40,23 +40,6 @@ jobs:
         with:
           version: latest
 
-      - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgtk-3-0 \
-            libx11-xcb1 \
-            libxcomposite1 \
-            libxdamage1 \
-            libxrandr2 \
-            libasound2 \
-            libasound2-dev \
-            libnss3 \
-            libxss1 \
-            libxtst6 \
-            libglib2.0-0
-
       - name: Get pnpm store directory
         id: pnpm-store
         shell: bash
@@ -72,9 +55,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Fix app-builder permissions
-        run: chmod +x node_modules/.pnpm/app-builder-bin@5.0.0-alpha.12/node_modules/app-builder-bin/linux/x64/app-builder
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
