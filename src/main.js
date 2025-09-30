@@ -79,6 +79,7 @@ ipcMain.handle("get-repo-status", async (event, repoPath) => {
         conflicted: status.conflicted,
         ahead: status.ahead,
         behind: status.behind,
+        not_added: status.not_added,
       },
     };
   } catch (error) {
@@ -135,3 +136,4 @@ ipcMain.handle("get-recent-commits", async (event, repoPath) => {
     return { success: false, error: error.message };
   }
 });
+
