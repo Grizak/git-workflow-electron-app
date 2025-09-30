@@ -177,6 +177,11 @@
         color: #fff;
       }
 
+      .status-untracked {
+        background: #17a2b8;
+        color: #fff;
+      }
+
       .commit-section {
         padding: 20px;
         border-bottom: 1px solid #404040;
@@ -399,30 +404,35 @@
         branchInfo.innerHTML = `Branch: <span class="branch-name">${branch}</span>`;
 
         const totalChanges =
-          repoStatus.modified.length +
-          repoStatus.created.length +
-          repoStatus.deleted.length;
+          (repoStatus.modified?.length || 0) +
+          (repoStatus.created?.length || 0) +
+          (repoStatus.deleted?.length || 0) +
+          (repoStatus.not_added?.length || 0);
         const stagedChanges = repoStatus.staged.length;
         fileStats.textContent = `${totalChanges} changes, ${stagedChanges} staged`;
       }
 
       function displayFileList() {
         const allFiles = [
-          ...repoStatus.modified.map((file) => ({
+          ...(repoStatus.modified || []).map((file) => ({
             name: file,
             status: "modified",
           })),
-          ...repoStatus.created.map((file) => ({
+          ...(repoStatus.created || []).map((file) => ({
             name: file,
             status: "added",
           })),
-          ...repoStatus.deleted.map((file) => ({
+          ...(repoStatus.deleted || []).map((file) => ({
             name: file,
             status: "deleted",
           })),
-          ...repoStatus.staged.map((file) => ({
+          ...(repoStatus.staged || []).map((file) => ({
             name: file,
             status: "staged",
+          })),
+          ...(repoStatus.not_added || []).map((file) => ({
+            name: file,
+            status: "untracked",
           })),
         ];
 
@@ -628,3 +638,4 @@
     </script>
   </body>
 </html>
+
