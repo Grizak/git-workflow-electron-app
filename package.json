@@ -18,7 +18,7 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "electron": "^38.1.2",
-    "electron-builder": "^25.1.8",
+    "electron-builder": "^24.13.3",
     "rimraf": "^6.0.1"
   },
   "dependencies": {
@@ -98,11 +98,6 @@
         "home",
         "removable-media"
       ]
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "app-builder-bin": "4.2.0"
     }
   }
 }

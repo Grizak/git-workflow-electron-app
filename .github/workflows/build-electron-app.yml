@@ -50,15 +50,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Remove node_modules and pnpm-lock.yaml
-        run: rm -rf node_modules pnpm-lock.yaml
-
       - name: Install dependencies
         run: pnpm install
-
-      - name: Fix app-builder permissions
-        run: |
-          chmod +x node_modules/.pnpm/app-builder-bin@4.2.0/node_modules/app-builder-bin/mac/app-builder_arm64 || true
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
