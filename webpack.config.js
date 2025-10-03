@@ -6,7 +6,7 @@ const mainConfig = {
   entry: './src/main.js',
   target: 'electron-main',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist', 'app'),
     filename: 'main.js'
   },
   node: {
@@ -28,13 +28,16 @@ const preloadConfig = {
   entry: './src/preload.js',
   target: 'electron-preload',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist', 'app'),
     filename: 'preload.js'
   }
 };
 
 const rendererConfig = {
   target: 'electron-renderer',
+  output: {
+    path: path.resolve(__dirname, 'dist', 'app')
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/renderer.html',
