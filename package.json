@@ -11,6 +11,7 @@
     "build:linux": "electron-builder --linux --config.directories.output=dist/linux",
     "build:mac": "electron-builder --mac --config.directories.output=dist/mac",
     "build:all": "concurrently \"pnpm run build:win\" \"pnpm run build:linux\" \"pnpm run build:mac\"",
+    "prebuild": "webpack --mode production",
     "clean": "rimraf dist",
     "dist": "pnpm clean && pnpm build:all"
   },
@@ -29,10 +30,10 @@
     "appId": "com.grizak.git-workflow-electron-app",
     "productName": "Git Workflow Electron App",
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "files": [
-      "src/**/*",
+      "dist/app/**/*",
       "node_modules/**/*",
       "package.json"
     ],
@@ -84,13 +85,6 @@
             "x64"
           ]
         }
-      ]
-    },
-    "snap": {
-      "plugs": [
-        "default",
-        "home",
-        "removable-media"
       ]
     }
   }
