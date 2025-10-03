@@ -2,18 +2,15 @@
   "name": "git-workflow-electron-app",
   "version": "1.1.4",
   "description": "A GUI for managing git commits with conventional commit messages",
-  "main": "src/main.js",
+  "main": "dist/app/main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev",
+    "dev": "electron src/main.js --dev",
     "build": "electron-builder",
-    "build:win": "electron-builder --win --config.directories.output=dist/win",
-    "build:linux": "electron-builder --linux --config.directories.output=dist/linux",
-    "build:mac": "electron-builder --mac --config.directories.output=dist/mac",
-    "build:all": "concurrently \"pnpm run build:win\" \"pnpm run build:linux\" \"pnpm run build:mac\"",
-    "prebuild": "webpack --mode production",
-    "clean": "rimraf dist",
-    "dist": "pnpm clean && pnpm build:all"
+    "build:win": "pnpm build:app &&electron-builder --win --config.directories.output=dist/win",
+    "build:linux": "pnpm build:app && electron-builder --linux --config.directories.output=dist/linux",
+    "build:mac": "pnpm build:app && electron-builder --mac --config.directories.output=dist/mac",
+    "build:app": "webpack --mode production"
   },
   "packageManager": "pnpm@10.17.1",
   "devDependencies": {
