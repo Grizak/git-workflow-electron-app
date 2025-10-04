@@ -1,8 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const simpleGit = require("simple-git");
+const RepoMonitor = require("./RepoMonitor");
 
 let mainWindow;
+let currentMonitor;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -39,6 +41,10 @@ app.on("activate", () => {
   }
 });
 
+const newCommitHandler = () => {
+  mainWindow.webContents.send("file-changed");
+};
+
 // IPC Handlers
 ipcMain.handle("select-repo", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
@@ -53,6 +59,18 @@ ipcMain.handle("select-repo", async () => {
     try {
       const git = simpleGit(repoPath);
       await git.status();
+
+      // Remove old watcher
+      if (currentMonitor) {
+        currentMonitor.stop();
+        currentMonitor.removeAllListeners();
+      }
+
+      // Set up watcher
+      currentMonitor = new RepoMonitor(repoPath);
+      currentMonitor.on("file-changed", newCommitHandler);
+      currentMonitor.start();
+
       return { success: true, path: repoPath };
     } catch (error) {
       return { success: false, error: "Not a valid git repository" };
@@ -137,3 +155,9 @@ ipcMain.handle("get-recent-commits", async (event, repoPath) => {
   }
 });
 
+app.on("before-quit", () => {
+  if (currentMonitor) {
+    currentMonitor.stop();
+    currentMonitor.removeAllListeners();
+  }
+});

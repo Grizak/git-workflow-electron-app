@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("get-file-diff", repoPath, fileName),
   getRecentCommits: (repoPath) =>
     ipcRenderer.invoke("get-recent-commits", repoPath),
+  onFileChange: (callback) => ipcRenderer.on("file-changed", callback),
 });
