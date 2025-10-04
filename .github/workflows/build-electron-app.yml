@@ -132,7 +132,7 @@ jobs:
             linux-build/*
             windows-build/*
             macos-build/*
-          draft: true
+          draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
