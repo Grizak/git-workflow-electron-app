@@ -5,25 +5,31 @@
   "main": "dist/app/main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron src/main.js --dev",
+    "dev": "electron . --dev",
     "build": "electron-builder",
     "build:win": "pnpm build:app &&electron-builder --win --config.directories.output=dist/win",
     "build:linux": "pnpm build:app && electron-builder --linux --config.directories.output=dist/linux",
     "build:mac": "pnpm build:app && electron-builder --mac --config.directories.output=dist/mac",
-    "build:app": "webpack --mode production"
+    "build:app": "webpack --mode production",
+    "build:start": "pnpm build:app && pnpm start",
+    "build:dev": "pnpm build:app && pnpm dev"
   },
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.0",
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.2",
     "electron": "^38.1.2",
     "electron-builder": "^24.13.3",
     "html-webpack-plugin": "^5.6.4",
+    "mini-css-extract-plugin": "^2.9.4",
     "rimraf": "^6.0.1",
     "terser-webpack-plugin": "^5.3.14",
     "webpack": "^5.102.0",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "chokidar": "^4.0.3",
     "simple-git": "^3.28.0"
   },
   "author": "Isak Grönlund <gronlundisak11@gmail.com> (https://isaksweb.xyz)",
