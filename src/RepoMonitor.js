@@ -36,7 +36,6 @@ class RepoMonitor extends EventEmitter {
     this.watcher = chokidar.watch(this.repoPath, {
       persistent: true,
       ignoreInitial: true,
-      ignored: /(^|[\/\\])\../, // ignore dotfiles/folders like .git
       awaitWriteFinish: {
         stabilityThreshold: 300,
         pollInterval: 100,
