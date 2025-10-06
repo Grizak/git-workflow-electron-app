@@ -2,11 +2,24 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const simpleGit = require("simple-git");
 const RepoMonitor = require("./RepoMonitor");
+const fs = require("fs");
+const ConfigManager = require("./ConfigManager");
 
-let mainWindow;
-let currentMonitor;
+let mainWindow, currentMonitor, configManager;
+
+function setUpStorage() {
+  const storagePath = app.getPath("userData");
+
+  if (!fs.existsSync(storagePath)) {
+    fs.mkdirSync(storagePath, { recursive: true });
+  }
+
+  configManager = new ConfigManager(path.join(storagePath, "config.json"));
+}
 
 function createWindow() {
+  setUpStorage();
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -25,6 +38,15 @@ function createWindow() {
   if (process.argv.includes("--dev")) {
     mainWindow.webContents.openDevTools();
   }
+
+  mainWindow.webContents.on("did-finish-load", () => {
+    if (configManager.config.repository) {
+      mainWindow.webContents.send(
+        "repository-on-init",
+        configManager.config.repository
+      );
+    }
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -40,10 +62,6 @@ app.on("activate", () => {
     createWindow();
   }
 });
-
-const newCommitHandler = () => {
-  mainWindow.webContents.send("file-changed");
-};
 
 // IPC Handlers
 ipcMain.handle("select-repo", async () => {
@@ -68,8 +86,16 @@ ipcMain.handle("select-repo", async () => {
 
       // Set up watcher
       currentMonitor = new RepoMonitor(repoPath);
-      currentMonitor.on("file-changed", newCommitHandler);
+      currentMonitor.on("file-changed", () => {
+        mainWindow.webContents.send("file-changed");
+      });
       currentMonitor.start();
+
+      if (configManager) {
+        configManager.updateConfig({
+          repository: repoPath,
+        });
+      }
 
       return { success: true, path: repoPath };
     } catch (error) {
@@ -80,7 +106,7 @@ ipcMain.handle("select-repo", async () => {
   return { success: false, error: "No folder selected" };
 });
 
-ipcMain.handle("get-repo-status", async (event, repoPath) => {
+ipcMain.handle("get-repo-status", async (_, repoPath) => {
   try {
     const git = simpleGit(repoPath);
     const status = await git.status();
@@ -105,7 +131,7 @@ ipcMain.handle("get-repo-status", async (event, repoPath) => {
   }
 });
 
-ipcMain.handle("stage-files", async (event, repoPath, files) => {
+ipcMain.handle("stage-files", async (_, repoPath, files) => {
   try {
     const git = simpleGit(repoPath);
     await git.add(files);
@@ -115,7 +141,7 @@ ipcMain.handle("stage-files", async (event, repoPath, files) => {
   }
 });
 
-ipcMain.handle("unstage-files", async (event, repoPath, files) => {
+ipcMain.handle("unstage-files", async (_, repoPath, files) => {
   try {
     const git = simpleGit(repoPath);
     await git.reset(["HEAD", ...files]);
@@ -125,7 +151,7 @@ ipcMain.handle("unstage-files", async (event, repoPath, files) => {
   }
 });
 
-ipcMain.handle("commit-changes", async (event, repoPath, message) => {
+ipcMain.handle("commit-changes", async (_, repoPath, message) => {
   try {
     const git = simpleGit(repoPath);
     const result = await git.commit(message);
@@ -135,7 +161,7 @@ ipcMain.handle("commit-changes", async (event, repoPath, message) => {
   }
 });
 
-ipcMain.handle("get-file-diff", async (event, repoPath, fileName) => {
+ipcMain.handle("get-file-diff", async (_, repoPath, fileName) => {
   try {
     const git = simpleGit(repoPath);
     const diff = await git.diff([fileName]);
@@ -145,12 +171,28 @@ ipcMain.handle("get-file-diff", async (event, repoPath, fileName) => {
   }
 });
 
-ipcMain.handle("get-recent-commits", async (event, repoPath) => {
+ipcMain.handle("get-recent-commits", async (_, repoPath) => {
   try {
     const git = simpleGit(repoPath);
     const log = await git.log({ maxCount: 10 });
     return { success: true, commits: log.all };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle("sync-git", async (_, repoPath) => {
+  try {
+    const git = simpleGit(repoPath);
+    const remotes = await git.getRemotes();
+
+    if (remotes.length > 0) {
+      await git.pull();
+      await git.push();
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Error when synchronizing upstream", error);
     return { success: false, error: error.message };
   }
 });

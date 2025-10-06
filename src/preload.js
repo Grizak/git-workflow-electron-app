@@ -14,4 +14,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getRecentCommits: (repoPath) =>
     ipcRenderer.invoke("get-recent-commits", repoPath),
   onFileChange: (callback) => ipcRenderer.on("file-changed", callback),
+  syncGit: (repoPath) => ipcRenderer.invoke("sync-git", repoPath),
+  onRepositoryConfig: (callback) =>
+    ipcRenderer.once("repository-on-init", (_event, repositoryPath) =>
+      callback(repositoryPath)
+    ),
 });

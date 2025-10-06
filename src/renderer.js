@@ -17,6 +17,7 @@ const stageAllBtn = document.getElementById("stageAll");
 const commitMessage = document.getElementById("commitMessage");
 const commitBtn = document.getElementById("commitBtn");
 const recentCommits = document.getElementById("recentCommits");
+const syncBtn = document.getElementById("syncBtn");
 
 // Event Listeners
 selectRepoBtn.addEventListener("click", selectRepository);
@@ -25,6 +26,7 @@ stageSelectedBtn.addEventListener("click", stageSelectedFiles);
 unstageSelectedBtn.addEventListener("click", unstageSelectedFiles);
 stageAllBtn.addEventListener("click", stageAllFiles);
 commitBtn.addEventListener("click", commitChanges);
+syncBtn.addEventListener("click", sync);
 
 commitMessage.addEventListener("input", updateCommitButton);
 
@@ -225,6 +227,7 @@ async function stageAllFiles() {
       ...repoStatus.modified,
       ...repoStatus.created,
       ...repoStatus.deleted,
+      ...repoStatus.not_added,
     ];
     if (allFiles.length === 0) return;
 
@@ -301,4 +304,28 @@ function showSuccess(message) {
   setTimeout(() => successDiv.remove(), 3000);
 }
 
+async function sync(event) {
+  syncBtn.disabled = true;
+  syncBtn.classList.add("spinning-border");
+  syncBtn.textContent = "Syncing to upstream";
+  const result = await window.electronAPI.syncGit(currentRepo);
+  syncBtn.disabled = false;
+  syncBtn.classList.remove("spinning-border");
+  if (result.success) {
+    syncBtn.textContent = "Sync changes from upstream";
+  } else {
+    syncBtn.textContent = "Failed to sync from upstream";
+    setTimeout(
+      () => (syncBtn.textContent = "Sync changes from upstream"),
+      10000
+    );
+  }
+}
+
 window.electronAPI.onFileChange(() => refreshRepository(false));
+window.electronAPI.onRepositoryConfig(async (repositoryPath) => {
+  currentRepo = repositoryPath;
+  repoPathSpan.textContent = currentRepo;
+  refreshRepoBtn.disabled = false;
+  await loadRepositoryData();
+});

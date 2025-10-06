@@ -255,3 +255,44 @@ button:disabled {
   font-size: 12px;
   color: #888;
 }
+
+button.spinning-border {
+  position: relative;
+  z-index: 1;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+button.spinning-border::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 4px;
+  padding: 3px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0deg 270deg,
+    #ff0080 270deg 280deg,
+    #ff8c00 280deg 290deg,
+    #40e0d0 290deg 300deg,
+    #4169e1 300deg 310deg,
+    transparent 310deg 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
