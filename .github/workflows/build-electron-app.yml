@@ -56,20 +56,20 @@ jobs:
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
         run: pnpm run build:linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Commented out because of duplicate releases
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
         run: pnpm run build:win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Commented out because of duplicate releases
 
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
         run: pnpm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Commented out because of duplicate releases
           # For code signing (optional)
           # CSC_LINK: ${{ secrets.CSC_LINK }}
           # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
