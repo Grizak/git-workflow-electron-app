@@ -304,21 +304,18 @@ function showSuccess(message) {
   setTimeout(() => successDiv.remove(), 3000);
 }
 
-async function sync(event) {
+async function sync() {
   syncBtn.disabled = true;
   syncBtn.classList.add("spinning-border");
-  syncBtn.textContent = "Syncing to upstream";
+  syncBtn.textContent = "Syncing upstream";
   const result = await window.electronAPI.syncGit(currentRepo);
   syncBtn.disabled = false;
   syncBtn.classList.remove("spinning-border");
   if (result.success) {
-    syncBtn.textContent = "Sync changes from upstream";
+    syncBtn.textContent = "Sync upstream";
   } else {
-    syncBtn.textContent = "Failed to sync from upstream";
-    setTimeout(
-      () => (syncBtn.textContent = "Sync changes from upstream"),
-      10000
-    );
+    syncBtn.textContent = "Failed to sync upstream";
+    setTimeout(() => (syncBtn.textContent = "Sync upstream"), 10000);
   }
 }
 
